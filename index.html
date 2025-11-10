@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animowany System Logowania</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* Animowane tło */
+        .animated-bg {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            z-index: -1;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Pływające kółka w tle */
+        .circles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .circles li {
+            position: absolute;
+            display: block;
+            list-style: none;
+            width: 20px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            animation: animate 25s linear infinite;
+            bottom: -150px;
+            border-radius: 50%;
+        }
+
+        .circles li:nth-child(1) { left: 25%; width: 80px; height: 80px; animation-delay: 0s; }
+        .circles li:nth-child(2) { left: 10%; width: 20px; height: 20px; animation-delay: 2s; animation-duration: 12s; }
+        .circles li:nth-child(3) { left: 70%; width: 20px; height: 20px; animation-delay: 4s; }
+        .circles li:nth-child(4) { left: 40%; width: 60px; height: 60px; animation-delay: 0s; animation-duration: 18s; }
+        .circles li:nth-child(5) { left: 65%; width: 20px; height: 20px; animation-delay: 0s; }
+        .circles li:nth-child(6) { left: 75%; width: 110px; height: 110px; animation-delay: 3s; }
+        .circles li:nth-child(7) { left: 35%; width: 150px; height: 150px; animation-delay: 7s; }
+        .circles li:nth-child(8) { left: 50%; width: 25px; height: 25px; animation-delay: 15s; animation-duration: 45s; }
+        .circles li:nth-child(9) { left: 20%; width: 15px; height: 15px; animation-delay: 2s; animation-duration: 35s; }
+        .circles li:nth-child(10) { left: 85%; width: 150px; height: 150px; animation-delay: 0s; animation-duration: 11s; }
+
+        @keyframes animate {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-1000px) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* Kontener formularza */
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .form-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            width: 400px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h2 {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 32px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            animation: pulse 2s ease infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .input-group input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .input-group input:focus {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: white;
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+
+        /* Animacja wpisywania */
+        .input-group input:focus + .input-animation {
+            width: 100%;
+        }
+
+        .input-animation {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 2px;
+            width: 0;
+            background: linear-gradient(90deg, #fff, #23d5ab);
+            transition: width 0.4s ease;
+        }
+
+        /* Animowane przyciski */
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #e73c7e, #23a6d5);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn:before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover:before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .switch-form {
+            text-align: center;
+            margin-top: 20px;
+            color: white;
+        }
+
+        .switch-form a {
+            color: #23d5ab;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .switch-form a:hover {
+            color: white;
+            text-shadow: 0 0 10px #23d5ab;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Ekran "Diddy Calling" */
+        .calling-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .phone-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            padding: 50px;
+            border-radius: 30px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            animation: phoneRing 1s ease infinite;
+        }
+
+        @keyframes phoneRing {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-10deg); }
+            75% { transform: rotate(10deg); }
+        }
+
+        .caller-image {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+            animation: avatarPulse 1.5s ease infinite;
+            box-shadow: 0 0 50px rgba(240, 147, 251, 0.6);
+        }
+
+        @keyframes avatarPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 50px rgba(240, 147, 251, 0.6); }
+            50% { transform: scale(1.1); box-shadow: 0 0 80px rgba(240, 147, 251, 0.9); }
+        }
+
+        .caller-name {
+            font-size: 48px;
+            color: white;
+            margin-bottom: 10px;
+            font-weight: bold;
+            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .calling-text {
+            font-size: 24px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 40px;
+            animation: blink 1.5s ease infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .call-buttons {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+        }
+
+        .call-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: none;
+            font-size: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .accept-btn {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .accept-btn:hover {
+            background: #45a049;
+            transform: scale(1.1);
+            box-shadow: 0 5px 30px rgba(76, 175, 80, 0.6);
+        }
+
+        .decline-btn {
+            background: #f44336;
+            color: white;
+        }
+
+        .decline-btn:hover {
+            background: #da190b;
+            transform: scale(1.1);
+            box-shadow: 0 5px 30px rgba(244, 67, 54, 0.6);
+        }
+
+        /* Animacja kropek ładowania */
+        .dots {
+            display: inline-block;
+        }
+
+        .dots span {
+            animation: blink 1.4s infinite;
+            animation-fill-mode: both;
+        }
+
+        .dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+    </style>
+</head>
+<body>
+    <!-- Animowane tło -->
+    <div class="animated-bg"></div>
+    <ul class="circles">
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+    </ul>
+
+    <!-- Formularz logowania -->
+    <div class="container">
+        <div class="form-container" id="loginForm">
+            <h2>🔐 Logowanie</h2>
+            <form onsubmit="handleLogin(event)">
+                <div class="input-group">
+                    <input type="text" id="loginUsername" placeholder="👤 Nazwa użytkownika" required>
+                    <div class="input-animation"></div>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="loginPassword" placeholder="🔒 Hasło" required>
+                    <div class="input-animation"></div>
+                </div>
+                <button type="submit" class="btn">
+                    <span>ZALOGUJ SIĘ</span>
+                </button>
+            </form>
+            <div class="switch-form">
+                Nie masz konta? <a onclick="switchToRegister()">Zarejestruj się</a>
+            </div>
+        </div>
+
+        <!-- Formularz rejestracji -->
+        <div class="form-container hidden" id="registerForm">
+            <h2>📝 Rejestracja</h2>
+            <form onsubmit="handleRegister(event)">
+                <div class="input-group">
+                    <input type="text" id="registerUsername" placeholder="👤 Nazwa użytkownika" required>
+                    <div class="input-animation"></div>
+                </div>
+                <div class="input-group">
+                    <input type="email" id="registerEmail" placeholder="📧 Email" required>
+                    <div class="input-animation"></div>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="registerPassword" placeholder="🔒 Hasło" required>
+                    <div class="input-animation"></div>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="registerPasswordConfirm" placeholder="🔒 Potwierdź hasło" required>
+                    <div class="input-animation"></div>
+                </div>
+                <button type="submit" class="btn">
+                    <span>ZAREJESTRUJ SIĘ</span>
+                </button>
+            </form>
+            <div class="switch-form">
+                Masz już konto? <a onclick="switchToLogin()">Zaloguj się</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ekran "Diddy Calling" -->
+    <div class="calling-screen" id="callingScreen">
+        <div class="phone-container">
+            <div class="caller-image">📱</div>
+            <div class="caller-name">Dicktor Calling!</div>
+            <div class="calling-text">Połączenie przychodzące<span class="dots"><span>.</span><span>.</span><span>.</span></span></div>
+            <div class="call-buttons">
+                <button class="call-btn decline-btn" onclick="declineCall()">💀</button>
+                <button class="call-btn accept-btn" onclick="acceptCall()">📞</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dźwięk dzwonka (generowany w JS) -->
+    <audio id="ringtone" loop></audio>
+
+    <script>
+        // Przechowywanie użytkowników (w prawdziwej aplikacji używaj bazy danych!)
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+
+        // Przełączanie między formularzami
+        function switchToRegister() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('registerForm').classList.remove('hidden');
+        }
+
+        function switchToLogin() {
+            document.getElementById('registerForm').classList.add('hidden');
+            document.getElementById('loginForm').classList.remove('hidden');
+        }
+
+        // Obsługa rejestracji
+        function handleRegister(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('registerUsername').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
+
+            if (password !== passwordConfirm) {
+                alert('Hasła nie są identyczne!');
+                return;
+            }
+
+            // Sprawdź czy użytkownik już istnieje
+            if (users.find(u => u.username === username)) {
+                alert('Użytkownik już istnieje!');
+                return;
+            }
+
+            // Dodaj użytkownika
+            users.push({ username, email, password });
+            localStorage.setItem('users', JSON.stringify(users));
+
+            alert('✅ Rejestracja udana! Możesz się teraz zalogować.');
+            switchToLogin();
+            
+            // Wyczyść formularz
+            document.getElementById('registerUsername').value = '';
+            document.getElementById('registerEmail').value = '';
+            document.getElementById('registerPassword').value = '';
+            document.getElementById('registerPasswordConfirm').value = '';
+        }
+
+        // Obsługa logowania
+        function handleLogin(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            // Sprawdź dane logowania
+            const user = users.find(u => u.username === username && u.password === password);
+
+            if (user) {
+                // Ukryj formularz
+                document.querySelector('.container').style.display = 'none';
+                
+                // Pokaż ekran dzwonienia
+                showCallingScreen();
+            } else {
+                alert('❌ Nieprawidłowa nazwa użytkownika lub hasło!');
+            }
+        }
+
+        // Pokaż ekran "Diddy Calling"
+        function showCallingScreen() {
+            const callingScreen = document.getElementById('callingScreen');
+            callingScreen.style.display = 'flex';
+            
+            // Odtwórz dźwięk dzwonka
+            playRingtone();
+        }
+
+        // Generuj i odtwarzaj dźwięk dzwonka
+        function playRingtone() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            let isPlaying = true;
+
+            function playTone() {
+                if (!isPlaying) return;
+
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.frequency.value = 800;
+                oscillator.type = 'sine';
+
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.5);
+
+                setTimeout(() => {
+                    const oscillator2 = audioContext.createOscillator();
+                    const gainNode2 = audioContext.createGain();
+
+                    oscillator2.connect(gainNode2);
+                    gainNode2.connect(audioContext.destination);
+
+                    oscillator2.frequency.value = 600;
+                    oscillator2.type = 'sine';
+
+                    gainNode2.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+                    oscillator2.start(audioContext.currentTime);
+                    oscillator2.stop(audioContext.currentTime + 0.5);
+                }, 500);
+
+                setTimeout(playTone, 2000);
+            }
+
+            playTone();
+
+            // Zapisz referencję do zatrzymania dźwięku
+            window.stopRingtone = () => {
+                isPlaying = false;
+            };
+        }
+
+        // Odbierz połączenie
+        function acceptCall() {
+            window.stopRingtone();
+            alert('🎉 Połączono z DIctorem jeb sie" 🎤');
+            resetApp();
+        }
+
+        // Odrzuć połączenie
+        function declineCall() {
+            window.stopRingtone();
+            alert('📵 Połączenie odrzucone. dictor bedzie smutny 😢');
+            resetApp();
+        }
+
+        // Reset aplikacji
+        function resetApp() {
+            document.getElementById('callingScreen').style.display = 'none';
+            document.querySelector('.container').style.display = 'flex';
+            document.getElementById('loginUsername').value = '';
+            document.getElementById('loginPassword').value = '';
+        }
+
+        // Dodaj efekty dźwiękowe dla przycisków (opcjonalnie)
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('mouseenter', () => {
+                // Możesz dodać subtelny dźwięk hover
+            });
+        });
+    </script>
+</body>
+</html>
