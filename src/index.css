@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Neonowe helpery */
+.neon-text { text-shadow: 0 0 8px rgba(0,247,255,0.7), 0 0 18px rgba(163,92,255,0.45); }
+.neon-border { box-shadow: 0 0 0 1px rgba(0,247,255,0.25), 0 0 20px rgba(163,92,255,0.25) inset; }
+.glass { background: rgba(255,255,255,0.04); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.07); }
